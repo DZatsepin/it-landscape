@@ -52,6 +52,25 @@
     background-image: radial-gradient(ellipse at 30% 20%, var(--glow), transparent 60%),
       linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
     background-size: 100% 100%, 32px 32px, 32px 32px; }
+  #canvas { position: relative; }
+  #svg { display: block; margin: 0 auto; width: auto; height: auto; max-width: 100%; }
+  .bar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; }
+  .bar button, .bar .label { flex: none; white-space: nowrap; }
+  .stats { flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+  @media (max-width: 700px) {
+    header { padding: 10px 14px; gap: 8px; } header h1 { font-size: 13px; }
+    header .sub, #loadBtn, #rotate { display: none; }
+    header button { padding: 4px 9px; font-size: 13px; }
+    .bar, .stats { padding-left: 14px; padding-right: 14px; }
+    #canvas { padding: 10px 12px 16px; }
+    #tourcap { margin: -10px -12px 6px; padding: 10px 12px 12px; }
+    #tourcap .t { font-size: 19px; }
+  }
+  #tourcap { position: sticky; top: 0; z-index: 5; margin: -14px -20px 6px; padding: 14px 20px 16px; background: linear-gradient(var(--bg) 70%, transparent); display: none; }
+  #tourcap.on { display: block; }
+  #tourcap .k { color: var(--accent); font: 700 12px ui-monospace, Consolas, monospace; letter-spacing: .18em; text-transform: uppercase; }
+  #tourcap .t { font-size: 24px; font-weight: 750; margin-top: 4px; transition: opacity .3s; }
+  button.tour { border-color: var(--accent); color: var(--accent); font-weight: 600; }
   aside { border-left: 1px solid var(--line); background: var(--panel); padding: 16px 18px; overflow: auto; max-height: calc(100vh - 150px); }
   aside h2 { font-size: 17px; margin: 0 0 4px; }
   aside h3 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 20px 0 6px; }
@@ -132,7 +151,9 @@
   <h1>IT <span>Landscape</span></h1>
   <span class="sub" id="subtitle">Pokatyt Incorporated (fictional): systems, business flows and what breaks if a system goes</span>
   <span class="spacer"></span>
-  <label class="btn" title="Load systems.csv, scenarios.csv and/or flows.csv">Load CSVs<input type="file" id="file" accept=".csv,text/csv" multiple></label>
+  <label class="btn" id="loadBtn" title="Load systems.csv, scenarios.csv and/or flows.csv">Load CSVs<input type="file" id="file" accept=".csv,text/csv" multiple></label>
+  <button id="tour" class="tour" title="Play a 30-second guided tour">▶ Tour</button>
+  <button id="rotate" title="Rotate the map between vertical and horizontal">Rotate map</button>
   <button id="motion" title="Pause or resume the flow animation">Pause motion</button>
   <button id="theme" title="Toggle dark/light theme">Theme</button>
 </header>
@@ -141,6 +162,7 @@
 <div id="banner"></div>
 <main>
   <div id="canvas">
+    <div id="tourcap"><div class="k"></div><div class="t"></div></div>
     <svg id="svg" role="img" aria-label="System landscape diagram"></svg>
     <div class="legend">
       <span class="l-own">Selected flow</span><span class="l-ctx">Rest of the process</span>
@@ -163,7 +185,8 @@ const kmoney = v => v >= 1000 ? "£" + Math.round(v / 1000) + "K" : "£" + v;
 
 // ---------- State ----------
 let data = { systems: [], scenarios: [], flows: [] };
-let state = { mode: "all", scenario: null, system: null, simulate: false, layout: "flow" };
+let state = { mode: "all", scenario: null, system: null, simulate: false, layout: "map" };
+let orient = "vertical";
 let pos = {}, geo = { W: MAP.W, H: MAP.H, kind: "map" };
 
 // ---------- CSV ----------
@@ -243,7 +266,7 @@ const isNarrow = () => (document.getElementById("canvas").clientWidth || 1200) <
 function layoutMap() {
   const layers = {};
   for (const s of data.systems) (layers[s.layer] ||= []).push(s);
-  if (isNarrow()) {   // vertical: one row per layer, top to bottom
+  if (orient === "vertical" || isNarrow()) {   // vertical: one row per layer, top to bottom
     pos = {}; geo = { W: MAPV.W, H: MAPV.H, kind: "mapv" };
     const maxCols = Math.max(1, ...Object.values(layers).map(l => l.length));
     const width = MAPV.LEFT * 2 + maxCols * MAPV.W + (maxCols - 1) * MAPV.GX;
@@ -348,7 +371,7 @@ function renderDiagram() {
   const flowView = mode === "scenario" && state.layout === "flow";
   const L = flowView ? layoutFlow(scenario) : layoutMap();
   svg.setAttribute("viewBox", `0 0 ${L.width} ${L.height}`);
-  svg.style.width = "100%"; svg.style.maxWidth = L.width + "px"; svg.style.height = "auto";
+  svg.setAttribute("width", L.width); svg.setAttribute("height", L.height);
 
   const edges = [], boxCls = {};
   if (mode === "all") {
@@ -402,6 +425,14 @@ function renderDiagram() {
   });
   for (const s of data.systems) if (pos[s.id]) out += boxSvg(s, (boxCls[s.id] || []).join(" "));
   svg.innerHTML = out + beams.join("") + badges.join("");
+  fitSvg();
+}
+// Keep the whole map visible on desktop without scrolling.
+function fitSvg() {
+  const svg = document.getElementById("svg");
+  if (innerWidth <= 1000) { svg.style.maxHeight = ""; return; }
+  const avail = innerHeight - svg.getBoundingClientRect().top - 44;
+  svg.style.maxHeight = Math.max(280, avail) + "px";
 }
 
 function renderBar() {
@@ -409,7 +440,7 @@ function renderBar() {
   document.getElementById("scenarioBar").innerHTML = `<span class="label">Processes</span>` +
     `<button data-scn="" class="${state.mode === "all" ? "active" : ""}">All systems</button>` +
     data.scenarios.map(s => `<button data-scn="${esc(s.id)}" title="${esc(s.description)}" class="${state.mode === "scenario" && state.scenario === s.id ? "active" : ""} ${involved.has(s.id) ? "involved" : ""}">${s.regulatory ? "⚑ " : ""}${esc(s.name)}</button>`).join("") +
-    (state.mode === "scenario" ? `<span class="spacer"></span><button id="layoutBtn" title="Switch between the process flow and the full landscape">${state.layout === "flow" ? "Show on full map" : "Show as flow"}</button>` : "");
+    "";
 }
 
 function renderStats() {
@@ -431,6 +462,7 @@ function renderPanel() {
     const cost = [...new Set(F.flatMap(f => [f.from, f.to]))].reduce((a, id) => a + ((sysById(id) || {}).annual_cost || 0), 0);
     el.innerHTML = `<h2>${esc(s.name)}${s.regulatory ? '<span class="tag bad">⚑ regulatory</span>' : ""}</h2>
       <p class="muted">${esc(s.description)}</p>
+      <p><button id="layoutBtn" title="Switch between the full landscape and a large step-by-step flow">${state.layout === "flow" ? "Show on full map" : "Show as large step-by-step flow"}</button></p>
       <p class="muted">Systems involved cost <b style="color:var(--text)">${money.format(cost)}</b> a year in total.</p>
       <h3>Steps</h3><ol>${F.map(f => `<li><span class="linkish" data-sys="${esc(f.from)}">${esc(nameOf(f.from))}</span> → <span class="linkish" data-sys="${esc(f.to)}">${esc(nameOf(f.to))}</span><br><span class="muted">${esc(f.data)}${f.channel ? " · " + esc(f.channel) : ""}</span></li>`).join("")}</ol>
       <p class="muted">Click a system to see every process it takes part in and what breaks without it.</p>`;
@@ -462,11 +494,12 @@ function renderPanel() {
     el.innerHTML = html; return;
   }
   el.innerHTML = `<h2>How to use</h2>
-    <ol><li>Pick a <b>process</b> above to see it as a flow, step by step.</li>
+    <ol><li>Press <b>▶ Tour</b> for a 30-second walkthrough.</li>
+    <li>Pick a <b>process</b> above to see it light up across the landscape, step by step.</li>
     <li>Click a <b>system</b> to see every process it takes part in.</li>
     <li>Use <b>If removed</b> to see what breaks, who is left without input and which regulatory processes are affected.</li>
     <li>Systems with no flows are flagged as decommissioning candidates.</li></ol>
-    <p class="muted">⚑ marks regulatory systems and processes. Dashed boxes are external parties. Press Esc to reset.</p>
+    <p class="muted">⚑ marks regulatory systems and processes. Dashed boxes are external parties. <b>Rotate map</b> switches between vertical and horizontal. Press Esc to reset.</p>
     <h3>Your own data</h3>
     <p>Use <b>Load CSVs</b> to open your own <code>systems.csv</code>, <code>scenarios.csv</code> and <code>flows.csv</code>. Files stay in your browser; nothing is uploaded.</p>
     <div id="warnings"></div>`;
@@ -479,6 +512,7 @@ function selectSystem(id) { if (!sysById(id)) return; state = { ...state, mode: 
 function selectScenario(id) { state = id ? { ...state, mode: "scenario", scenario: id, system: null, simulate: false } : { ...state, mode: "all", scenario: null, system: null, simulate: false }; render(); }
 
 document.addEventListener("click", e => {
+  if (tourTimer && e.isTrusted && e.target.id !== "tour") stopTour();
   if (e.target.id === "simulate") { state.simulate = !state.simulate; return render(); }
   if (e.target.id === "layoutBtn") { state.layout = state.layout === "flow" ? "map" : "flow"; return render(); }
   const sys = e.target.closest("[data-sys], .sys");
@@ -499,6 +533,33 @@ motionBtn.onclick = () => applyMotion(document.body.classList.contains("no-motio
 document.getElementById("theme").onclick = () => applyTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
 applyTheme(store.get("itl-theme") || "dark");
 applyMotion(store.get("itl-motion") !== "0");
+orient = store.get("itl-orient") || "vertical";
+document.getElementById("rotate").onclick = () => { orient = orient === "vertical" ? "horizontal" : "vertical"; store.set("itl-orient", orient); renderDiagram(); };
+
+// ---------- Guided tour (same story as the demo video) ----------
+const TOUR = [
+  ["Pokatyt Incorporated · a fictional broker", '"Can we switch this system off?"', () => selectScenario(""), 3500],
+  ["1 · Trading", "Equity trade: client to settlement", () => selectScenario("EQ"), 5000],
+  ["2 · Regulatory reporting", "Trades reported to the regulator", () => selectScenario("TR"), 4200],
+  ["3 · Finance", "Payments, cash and the ledger", () => selectScenario("PAYM"), 4000],
+  ["4 · Click a system", "What depends on the reporting hub?", () => selectSystem("RHUB"), 2800],
+  ["5 · Simulate removal", "2 regulatory processes break", () => { state.simulate = true; render(); }, 4500],
+  ["6 · Find savings", "No recorded flows · £35k annual cost", () => selectSystem("RISK_OLD"), 4000],
+  ["Your turn", "Pick a process above or click any system", () => selectScenario(""), 4000],
+];
+let tourTimer = null;
+const tourBtn = document.getElementById("tour"), tourCap = document.getElementById("tourcap");
+function stopTour() { clearTimeout(tourTimer); tourTimer = null; tourCap.classList.remove("on"); tourBtn.textContent = "▶ Tour"; fitSvg(); }
+function playTour(i = 0) {
+  if (i >= TOUR.length || !data.systems.length) return stopTour();
+  const [k, t, act, ms] = TOUR[i];
+  if (!sysById("RHUB") || !sysById("RISK_OLD")) return stopTour();   // tour is written for the demo data
+  tourCap.classList.add("on"); tourCap.querySelector(".k").textContent = k; tourCap.querySelector(".t").textContent = t;
+  state.layout = "map"; act();
+  tourBtn.textContent = "■ Stop tour";
+  tourTimer = setTimeout(() => playTour(i + 1), ms);
+}
+tourBtn.onclick = () => tourTimer ? stopTour() : playTour();
 
 document.getElementById("file").addEventListener("change", async e => {
   const loaded = [];
@@ -527,7 +588,7 @@ async function boot() {
   render();
 }
 let resizeTimer; addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { renderDiagram(); }, 150); });
-boot();
+boot().then(() => { if (!store.get("itl-toured")) { store.set("itl-toured", "1"); playTour(); } });
 </script>
 </body>
 </html>

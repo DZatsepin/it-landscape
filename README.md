@@ -33,14 +33,15 @@ Treat the landscape as **data, not a drawing**.
 
 `index.html` reads the CSVs and draws the diagram (layers become columns). Everything else is derived:
 
-- **Flow view:** pick a process to see only the systems involved, as large blocks laid out step by step, with light pulses travelling along each flow. *Show on full map* puts the same process back into the whole landscape.
+- **Guided tour:** *▶ Tour* plays a 30-second walkthrough of the main features. It runs once automatically on a visitor's first visit.
+- **Process view:** pick a process to see it light up across the landscape, step by step, with light pulses travelling along each flow. *Show as large step-by-step flow* shows the same process with only its systems, as large blocks.
 - **System view:** click a system to see every process it takes part in. Its own steps are highlighted and the rest of each process is shown faded, so you keep the context.
 - **If removed:** for each affected process the panel shows how many steps break directly, which systems are left without input, what is at risk downstream, and a warning when the process is regulatory. *Simulate removal* shows the same thing on the diagram.
 - **Housekeeping:** total annual run cost, contracts ending within 180 days, and systems with no flows at all, which are flagged as decommissioning candidates together with the potential saving.
 - **Your own data:** *Load CSVs* opens your files in the browser. Nothing is uploaded anywhere.
-- Dark (default) and light themes, a *Pause motion* switch, keyboard navigation (Tab, Enter, Esc).
+- Vertical map by default (it fits phones and laptops), *Rotate map* for the horizontal view, dark and light themes, a *Pause motion* switch, keyboard navigation (Tab, Enter, Esc).
 
-![Flow view: equity trade lifecycle](docs/process-view.png)
+![Process view: equity trade lifecycle](docs/process-view.png)
 
 ![Simulating the removal of the reporting hub](docs/screenshot.png)
 
