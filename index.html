@@ -130,7 +130,7 @@
 <body>
 <header>
   <h1>IT <span>Landscape</span></h1>
-  <span class="sub" id="subtitle">Northwind Securities (fictional): systems, business flows and what breaks if a system goes</span>
+  <span class="sub" id="subtitle">Pokatyt Incorporated (fictional): systems, business flows and what breaks if a system goes</span>
   <span class="spacer"></span>
   <label class="btn" title="Load systems.csv, scenarios.csv and/or flows.csv">Load CSVs<input type="file" id="file" accept=".csv,text/csv" multiple></label>
   <button id="motion" title="Pause or resume the flow animation">Pause motion</button>
@@ -255,7 +255,8 @@ function layoutFlow(sid) {
   pos = {}; geo = { W: FLOW.W, H: FLOW.H, kind: "flow" };
   const order = [];
   for (const f of flowsOf(sid)) for (const id of [f.from, f.to]) if (!order.includes(id) && sysById(id)) order.push(id);
-  const n = order.length, cols = n <= 4 ? n : Math.min(4, Math.ceil(n / 2)), rows = Math.ceil(n / cols);
+  const narrow = (document.getElementById("canvas").clientWidth || 1200) < 900, maxCols = narrow ? 2 : 4;
+  const n = order.length, cols = n <= maxCols ? n : Math.min(maxCols, Math.ceil(n / 2)), rows = Math.ceil(n / cols);
   order.forEach((id, i) => {
     const r = Math.floor(i / cols); let c = i % cols; if (r % 2) c = cols - 1 - c;
     pos[id] = { x: FLOW.LEFT + c * (FLOW.W + FLOW.GX), y: FLOW.TOP + r * (FLOW.H + FLOW.GY), slot: { r, c } };
@@ -499,6 +500,7 @@ async function boot() {
   }
   render();
 }
+let resizeTimer; addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (state.mode === "scenario") renderDiagram(); }, 150); });
 boot();
 </script>
 </body>

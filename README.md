@@ -6,7 +6,7 @@ An interactive map of a firm's systems and business processes, built as **one HT
 
 ![Demo: process view, system view and simulated removal](docs/demo.gif)
 
-The demo uses **Northwind Securities**, a fictional broker with generic systems (OMS, booking, reporting hub, ARM, APA, general ledger and so on). Any resemblance to a real firm's stack is coincidental.
+The demo uses **Pokatyt Incorporated**, a fictional broker with generic systems (OMS, booking, reporting hub, ARM, APA, general ledger and so on). Any resemblance to a real firm's stack is coincidental.
 
 ---
 
