@@ -75,11 +75,20 @@
   .sys .meta { font-size: 10.5px; fill: var(--muted); }
   .sys .flag { font-size: 11px; fill: var(--broken); }
   .edge { fill: none; stroke-width: 1.6; }
-  .edge.faint { stroke: var(--faint); }
-  .edge.active, .edge.own { stroke: var(--accent); stroke-width: 2.2; }
+  .edge.faint { stroke: var(--faint); stroke-dasharray: 4 6; animation: flow-slow 3s linear infinite; }
+  .edge:hover { stroke-width: 3.5; opacity: 1; cursor: help; }
+  .edge.active, .edge.own { stroke: var(--accent); stroke-width: 2.2; stroke-dasharray: 10 6; animation: flow 0.9s linear infinite; }
   .edge.ctx { stroke: var(--ctx); opacity: .35; }
   .edge.broken { stroke: var(--broken); stroke-width: 2.4; stroke-dasharray: 6 4; }
-  .edge.risk { stroke: var(--risk); stroke-width: 2; stroke-dasharray: 3 3; }
+  .edge.risk { stroke: var(--risk); stroke-width: 2; stroke-dasharray: 3 3; animation: flow-risk 1.4s linear infinite; }
+  .pulse { fill: var(--accent); filter: drop-shadow(0 0 3px var(--accent)); pointer-events: none; }
+  .pulse.risk { fill: var(--risk); filter: drop-shadow(0 0 3px var(--risk)); }
+  @keyframes flow { to { stroke-dashoffset: -16; } }
+  @keyframes flow-slow { to { stroke-dashoffset: -20; } }
+  @keyframes flow-risk { to { stroke-dashoffset: -12; } }
+  body.no-motion .edge { animation: none; }
+  body.no-motion .pulse { display: none; }
+  @media (prefers-reduced-motion: reduce) { .edge { animation: none !important; } .pulse { display: none; } }
   .badge circle { fill: var(--panel); stroke-width: 1.5; }
   .badge text { font-size: 10px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
   .badge.active circle, .badge.own circle { stroke: var(--accent); }
@@ -100,6 +109,7 @@
   <span class="sub" id="subtitle">Northwind Securities (fictional): systems, business flows and what breaks if a system goes</span>
   <span class="spacer"></span>
   <label class="btn" title="Load systems.csv, scenarios.csv and/or flows.csv">Load CSVs<input type="file" id="file" accept=".csv,text/csv" multiple></label>
+  <button id="motion" title="Pause or resume the flow animation">Pause motion</button>
   <button id="theme" title="Toggle light/dark theme">Theme</button>
 </header>
 <div class="bar" id="scenarioBar"></div>
@@ -281,14 +291,18 @@ function renderDiagram() {
 
   let out = `<defs>${markers}</defs>`;
   for (let l = 0; l <= maxLayer; l++) out += `<text class="colhead" x="${LEFT + l * COL_W}" y="22">${esc(LAYER_NAMES[l] || "Layer " + l)}</text>`;
-  const badges = [];
-  for (const e of edges) {
-    const g = edgePath(e.flow); if (!g) continue;
+  const badges = [], pulses = [];
+  edges.forEach((e, i) => {
+    const g = edgePath(e.flow); if (!g) return;
     const scn = scnById(e.flow.scenario_id);
     const title = `${scn ? scn.name : e.flow.scenario_id} · step ${e.flow.step}: ${nameOf(e.flow.from)} → ${nameOf(e.flow.to)} — ${e.flow.data}${e.flow.channel ? " (" + e.flow.channel + ")" : ""}`;
-    out += `<path class="edge ${e.cls}" d="${g.d}" marker-end="url(#m-${e.cls})"><title>${esc(title)}</title></path>`;
+    out += `<path id="e${i}" class="edge ${e.cls}" d="${g.d}" marker-end="url(#m-${e.cls})"><title>${esc(title)}</title></path>`;
+    if (["active", "own", "risk"].includes(e.cls)) {
+      const dur = 1.6, delay = ((e.flow.step - 1) * 0.45) % 4;
+      pulses.push(`<circle class="pulse ${e.cls === "risk" ? "risk" : ""}" r="4" opacity="0"><set attributeName="opacity" to="1" begin="${delay}s"/><animateMotion dur="${dur}s" begin="${delay}s" repeatCount="indefinite"><mpath href="#e${i}"/></animateMotion></circle>`);
+    }
     if (e.badge) badges.push(`<g class="badge ${e.cls}"><title>${esc(title)}</title><circle cx="${g.mid.x}" cy="${g.mid.y}" r="9"/><text x="${g.mid.x}" y="${g.mid.y}">${e.flow.step}</text></g>`);
-  }
+  });
   for (const s of data.systems) {
     const p = pos[s.id], cls = (boxCls[s.id] || []).join(" ");
     const meta = [s.type, s.criticality].filter(Boolean).join(" · ");
@@ -300,7 +314,7 @@ function renderDiagram() {
       ${s.regulatory ? `<text class="flag" x="${p.x + BOX_W - 16}" y="${p.y + 17}">⚑</text>` : ""}
       ${cross}<title>${esc(s.name + " — " + (s.purpose || ""))}</title></g>`;
   }
-  svg.innerHTML = out + badges.join("");
+  svg.innerHTML = out + pulses.join("") + badges.join("");
 }
 const trim = (s, n) => s.length > n ? s.slice(0, n - 1) + "…" : s;
 
@@ -392,6 +406,9 @@ document.addEventListener("keydown", e => {
 
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch { } } };
 function applyTheme(t) { document.documentElement.dataset.theme = t; store.set("itl-theme", t); }
+const motionBtn = document.getElementById("motion");
+function applyMotion(on) { document.body.classList.toggle("no-motion", !on); motionBtn.textContent = on ? "Pause motion" : "Play motion"; store.set("itl-motion", on ? "1" : "0"); const svg = document.getElementById("svg"); if (svg.pauseAnimations) on ? svg.unpauseAnimations() : svg.pauseAnimations(); }
+motionBtn.onclick = () => applyMotion(document.body.classList.contains("no-motion"));
 document.getElementById("theme").onclick = () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
 applyTheme(store.get("itl-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
 
@@ -421,7 +438,7 @@ async function boot() {
   }
   render();
 }
-boot();
+boot().then(() => applyMotion(store.get("itl-motion") !== "0"));
 </script>
 </body>
 </html>
