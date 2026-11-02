@@ -4,7 +4,7 @@ An interactive map of a firm's systems and business processes, built as **one HT
 
 **Live demo:** https://dzatsepin.github.io/it-landscape/
 
-![Simulating the removal of the reporting hub](docs/screenshot.png)
+![Demo: process view, system view and simulated removal](docs/demo.gif)
 
 The demo uses **Northwind Securities**, a fictional broker with generic systems (OMS, booking, reporting hub, ARM, APA, general ledger and so on). Any resemblance to a real firm's stack is coincidental.
 
@@ -41,6 +41,8 @@ Treat the landscape as **data, not a drawing**.
 - Light and dark themes, keyboard navigation (Tab, Enter, Esc).
 
 ![Process view: equity trade lifecycle](docs/process-view.png)
+
+![Simulating the removal of the reporting hub](docs/screenshot.png)
 
 ### Why CSV and plain HTML
 
