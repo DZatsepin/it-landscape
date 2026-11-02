@@ -1,0 +1,8 @@
+id,name,description,regulatory
+EQ,Equity trade lifecycle,From client order to settlement and accounting,N
+TR,Transaction reporting,T+1 transaction reports to the regulator via an ARM,Y
+PT,Post-trade transparency,Near real-time trade publication via an APA,Y
+ON,Client onboarding,KYC checks and client static data before the first trade,Y
+EOD,End-of-day pricing,Closing prices for valuation and P&L,N
+PAYM,Payments and cash,Outgoing payments and cash reconciliation,N
+ME,Month-end and MI,Ledger close and management information,N

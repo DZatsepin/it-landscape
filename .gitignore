@@ -1,0 +1,12 @@
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Private data: never commit real landscapes
+private/
+*.private.csv
+*.xlsx
+*.vsdx

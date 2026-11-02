@@ -1,0 +1,31 @@
+scenario_id,step,from,to,data,channel
+EQ,1,CLIENT,OMS,Client order,FIX
+EQ,2,OMS,VENUE,Order routed for execution,FIX
+EQ,3,VENUE,OMS,Fills,FIX
+EQ,4,OMS,BOOK,Executed trade,API
+EQ,5,BOOK,SETTLE,Settlement details,API
+EQ,6,SETTLE,CSD,Settlement instruction,ISO 15022
+EQ,7,CSD,RECON,Settlement and custody statements,SFTP
+EQ,8,BOOK,RECON,Positions and expected settlements,SFTP
+EQ,9,BOOK,GL,Accounting postings,API
+TR,1,BOOK,RHUB,Executed trades,SFTP
+TR,2,KYC,RHUB,Client identifiers (LEI),API
+TR,3,RHUB,ARM,Transaction reports,SFTP
+TR,4,ARM,REG,Validated submissions,Regulator gateway
+TR,5,ARM,RHUB,Acknowledgements and rejections,SFTP
+PT,1,OMS,RHUB,Executed trades (real time),API
+PT,2,RHUB,APA,Post-trade reports,API
+ON,1,CLIENT,CRM,Onboarding request and documents,Portal
+ON,2,CRM,KYC,Due diligence case,API
+ON,3,KYC,BOOK,Approved client static data,API
+ON,4,KYC,OMS,Trading permissions,API
+EOD,1,MDV,PRICING,Closing prices and reference data,API
+EOD,2,PRICING,OMS,Reference prices,API
+EOD,3,PRICING,BOOK,End-of-day prices,SFTP
+EOD,4,PRICING,DWH,Price history,SFTP
+PAYM,1,BOOK,PAY,Cash movements,API
+PAYM,2,PAY,BANK,Payment messages,SWIFT
+PAYM,3,BANK,RECON,Account statements,SWIFT
+PAYM,4,PAY,GL,Payment postings,API
+ME,1,BOOK,DWH,Positions and trades,SFTP
+ME,2,GL,DWH,Trial balance,SFTP

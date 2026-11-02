@@ -1,0 +1,21 @@
+id,name,type,layer,purpose,criticality,annual_cost,contract_end,regulatory
+CLIENT,Institutional clients,External,0,Clients sending orders and receiving confirmations,High,0,,N
+VENUE,Trading venues and brokers,External,0,Execution venues and executing brokers,High,0,,N
+MDV,Market data vendor,Vendor,0,Real-time and end-of-day prices and reference data,High,85000,2027-09-30,N
+OMS,Order management system,Vendor,1,Order capture routing and execution management,High,120000,2027-06-30,N
+CRM,CRM,Vendor,1,Client relationship and pipeline management,Medium,18000,2026-12-31,N
+PRICING,Pricing service,Internal,1,Normalises market data and publishes end-of-day prices,Medium,15000,,N
+BOOK,Booking system,Vendor,2,Trade booking positions and lifecycle events,High,150000,2028-01-31,Y
+KYC,KYC and onboarding,Vendor,2,Client due diligence screening and static data,High,30000,2027-08-31,Y
+SETTLE,Settlement gateway,Vendor,2,Generates and routes settlement instructions,High,40000,2027-09-30,N
+RECON,Reconciliation tool,Vendor,2,Daily cash and position reconciliations,Medium,25000,2026-11-30,Y
+PAY,Payments gateway,Vendor,2,Outgoing payments and cash movements,High,22000,2027-10-31,N
+GL,General ledger,Vendor,3,Accounting postings and financial statements,High,45000,2027-12-31,Y
+RHUB,Reporting hub,Vendor,3,Enriches and validates regulatory reports,High,60000,2027-10-31,Y
+DWH,Data warehouse,Internal,3,Management information and analytics,Low,12000,,N
+RISK_OLD,Legacy risk engine,Internal,3,Historical VaR engine kept running after a migration,Low,35000,2026-12-31,N
+ARM,ARM (transaction reporting),Vendor,4,Approved Reporting Mechanism for transaction reports,High,28000,2027-05-31,Y
+APA,APA (trade publication),Vendor,4,Approved Publication Arrangement for post-trade transparency,High,20000,2027-05-31,Y
+CSD,Custodian / CSD,External,4,Settlement and safekeeping of securities,High,0,,N
+BANK,Correspondent bank,External,4,Cash accounts and payment clearing,High,0,,N
+REG,Regulator,External,5,National competent authority,High,0,,Y
