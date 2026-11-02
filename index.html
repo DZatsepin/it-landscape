@@ -452,7 +452,7 @@ function renderStats() {
     `<span><b>${data.scenarios.length}</b> processes (${data.scenarios.filter(s => s.regulatory).length} regulatory)</span>` +
     `<span><b>${money.format(total)}</b> annual run cost</span>` +
     `<span><b>${soon.length}</b> contracts ending within ${SOON_DAYS} days${soon.length ? ": " + soon.map(s => `<a data-sys="${esc(s.id)}">${esc(s.name)}</a>`).join(", ") : ""}</span>` +
-    `<span><b>${orphans.length}</b> without flows${orphans.length ? ": " + orphans.map(s => `<a data-sys="${esc(s.id)}">${esc(s.name)}</a>`).join(", ") : ""}</span>`;
+    `<span><b>${orphans.length}</b> with no recorded flows${orphans.length ? ": " + orphans.map(s => `<a data-sys="${esc(s.id)}">${esc(s.name)}</a>`).join(", ") : ""}</span>`;
 }
 
 function renderPanel() {
@@ -477,7 +477,7 @@ function renderPanel() {
       <dt>Annual cost</dt><dd>${s.annual_cost ? money.format(s.annual_cost) : "—"}</dd><dt>Contract end</dt><dd>${contract}</dd></dl>
       <h3>Processes (${procs.length})</h3>`;
     if (!procs.length) {
-      html += `<div class="card"><b class="warn">No flows reference this system.</b><p>${s.type === "External" ? "External party with no modelled flows." : `Candidate for decommissioning${s.annual_cost ? ` — saves up to <b>${money.format(s.annual_cost)}</b> a year` : ""}. Confirm with the business owner and check for undocumented interfaces first.`}</p></div>`;
+      html += `<div class="card"><b class="warn">No recorded flows reference this system.</b><p>${s.type === "External" ? "External party with no modelled flows." : `Candidate for decommissioning${s.annual_cost ? ` — saves up to <b>${money.format(s.annual_cost)}</b> a year` : ""}. Confirm with the business owner and check for undocumented interfaces first.`}</p></div>`;
       el.innerHTML = html; return;
     }
     html += `<ul>${procs.map(p => `<li><span class="linkish" data-scn="${esc(p.id)}">${p.regulatory ? "⚑ " : ""}${esc(p.name)}</span> <span class="muted">— ${flowsOf(p.id).filter(f => f.from === s.id || f.to === s.id).map(f => "step " + f.step).join(", ")}</span></li>`).join("")}</ul>
@@ -498,7 +498,7 @@ function renderPanel() {
     <li>Pick a <b>process</b> above to see it light up across the landscape, step by step.</li>
     <li>Click a <b>system</b> to see every process it takes part in.</li>
     <li>Use <b>If removed</b> to see what breaks, who is left without input and which regulatory processes are affected.</li>
-    <li>Systems with no flows are flagged as decommissioning candidates.</li></ol>
+    <li>Systems with no recorded flows are flagged as decommissioning candidates.</li></ol>
     <p class="muted">⚑ marks regulatory systems and processes. Dashed boxes are external parties. <b>Rotate map</b> switches between vertical and horizontal. Press Esc to reset.</p>
     <h3>Your own data</h3>
     <p>Use <b>Load CSVs</b> to open your own <code>systems.csv</code>, <code>scenarios.csv</code> and <code>flows.csv</code>. Files stay in your browser; nothing is uploaded.</p>

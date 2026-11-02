@@ -17,7 +17,7 @@ In most small and mid-sized firms, the IT landscape lives in a diagram that some
 - *Which processes does this system support?*
 - *If we decommission it, or it goes down, what breaks, and is any of it regulatory?*
 - *What are we paying for, and which contracts are coming up for renewal?*
-- *Which systems does nothing actually depend on any more?*
+- *Which systems have nothing recorded as depending on them any more?*
 
 Static diagrams go out of date because updating them is a drawing exercise rather than a data change. Answering the questions above means interviewing people every time.
 
@@ -31,13 +31,13 @@ Treat the landscape as **data, not a drawing**.
 | `data/scenarios.csv` | business process | `id`, `name`, `description`, `regulatory` |
 | `data/flows.csv` | step in a process | `scenario_id`, `step`, `from`, `to`, `data`, `channel` |
 
-`index.html` reads the CSVs and draws the diagram (layers become columns). Everything else is derived:
+`index.html` reads the CSVs and draws the diagram (layers become rows; *Rotate map* turns them into columns). Everything else is derived:
 
 - **Guided tour:** *▶ Tour* plays a 30-second walkthrough of the main features. It runs once automatically on a visitor's first visit.
 - **Process view:** pick a process to see it light up across the landscape, step by step, with light pulses travelling along each flow. *Show as large step-by-step flow* shows the same process with only its systems, as large blocks.
 - **System view:** click a system to see every process it takes part in. Its own steps are highlighted and the rest of each process is shown faded, so you keep the context.
 - **If removed:** for each affected process the panel shows how many steps break directly, which systems are left without input, what is at risk downstream, and a warning when the process is regulatory. *Simulate removal* shows the same thing on the diagram.
-- **Housekeeping:** total annual run cost, contracts ending within 180 days, and systems with no flows at all, which are flagged as decommissioning candidates together with the potential saving.
+- **Housekeeping:** total annual run cost, contracts ending within 180 days, and systems with no recorded flows, which are flagged as decommissioning candidates together with the potential saving.
 - **Your own data:** *Load CSVs* opens your files in the browser. Nothing is uploaded anywhere.
 - Vertical map by default (it fits phones and laptops), *Rotate map* for the horizontal view, dark and light themes, a *Pause motion* switch, keyboard navigation (Tab, Enter, Esc).
 
@@ -82,17 +82,19 @@ python -m http.server 8000
 
 Opening `index.html` directly from disk also works, but browsers block it from reading `data/` automatically. Use **Load CSVs** and pick the three files.
 
-**With your own data:** copy the three CSVs, replace the rows, keep the headers. `layer` is a number from 0 (left) upwards; the column names for layers are set in `LAYER_NAMES` at the top of the script. `type` is `External`, `Vendor` or `Internal`. `regulatory` is `Y` or `N`.
+**With your own data:** copy the three CSVs, replace the rows, keep the headers. `layer` is a number from 0 (top, or left when rotated) upwards; the column names for layers are set in `LAYER_NAMES` at the top of the script. `type` is `External`, `Vendor` or `Internal`. `regulatory` is `Y` or `N`.
 
 > Before you publish a fork with real data, remember that a list of systems, vendors and interfaces is useful reconnaissance for an attacker. Keep real landscapes private.
 
-**Publish on GitHub Pages:** *Settings → Pages → Deploy from a branch → `main` / root*.
+**Publish on GitHub Pages:** *Settings → Pages → Source: GitHub Actions*. The workflow in `.github/workflows/pages.yml` deploys the site on every push to `main`.
 
 ## Repository structure
 
 ```
 it-landscape/
-├── index.html          # the whole app: layout, rendering, impact analysis
+├── index.html          # the whole app: layout, rendering, impact analysis, tour
+├── .github/workflows/
+│   └── pages.yml       # deploys the demo to GitHub Pages
 ├── data/
 │   ├── systems.csv
 │   ├── scenarios.csv
