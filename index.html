@@ -14,112 +14,127 @@
 <meta property="og:image:height" content="820">
 <meta name="twitter:card" content="summary_large_image">
 <style>
-  :root {
-    --bg: #f6f7f9; --panel: #ffffff; --text: #1d2330; --muted: #6b7385; --line: #d9dde5;
-    --box: #ffffff; --box-border: #b9c0cc; --accent: #2f6fde; --accent-soft: #e3ecfc;
-    --faint: #c3c9d4; --ctx: #9aa3b2; --broken: #d6362f; --risk: #e08a00; --ok: #2e9b5f;
-    --ext: #eef0f4; --vendor: #ffffff; --internal: #f3f8f1;
+  :root, [data-theme="dark"] {
+    --bg: #05070b; --panel: #0a0e14; --text: #e9eef5; --muted: #7c8797; --line: #18202b;
+    --box: #0d1219; --box-border: #1f2b38; --accent: #ff7a1a; --accent-soft: rgba(255,122,26,.12);
+    --faint: #1b2430; --ctx: #364252; --broken: #ff3b5c; --risk: #ffd23f; --beam: #ff8a2a;
+    --ext: #080b10; --vendor: #0d1219; --internal: #0b1411; --grid: rgba(255,255,255,.035); --glow: rgba(255,122,26,.10);
+    --btn-on-text: #0a0e14;
   }
-  [data-theme="dark"] {
-    --bg: #12151c; --panel: #1a1f29; --text: #e5e8ef; --muted: #8e97a8; --line: #2c3341;
-    --box: #222936; --box-border: #3d4656; --accent: #5b93f5; --accent-soft: #233150;
-    --faint: #3a4252; --ctx: #6b7486; --broken: #ff5d55; --risk: #ffad33; --ok: #4cc583;
-    --ext: #1d222c; --vendor: #222936; --internal: #1f2a24;
+  [data-theme="light"] {
+    --bg: #f5f6f8; --panel: #ffffff; --text: #1b2230; --muted: #687285; --line: #dde1e8;
+    --box: #ffffff; --box-border: #c3cad5; --accent: #e8620c; --accent-soft: rgba(232,98,12,.10);
+    --faint: #cdd3dc; --ctx: #a1aab8; --broken: #d6283f; --risk: #c98a00; --beam: #f07118;
+    --ext: #eef0f4; --vendor: #ffffff; --internal: #f2f8f3; --grid: rgba(0,0,0,.04); --glow: rgba(232,98,12,.06);
+    --btn-on-text: #ffffff;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); }
+  body { margin: 0; font: 14px/1.45 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); }
+  .mono { font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace; }
   header { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--line); background: var(--panel); flex-wrap: wrap; }
-  header h1 { font-size: 17px; margin: 0; font-weight: 600; }
+  header h1 { font-size: 15px; margin: 0; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+  header h1 span { color: var(--accent); }
   header .sub { color: var(--muted); font-size: 13px; }
-  header .spacer { flex: 1; }
-  button, .btn { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--text); padding: 5px 11px; border-radius: 6px; cursor: pointer; }
+  header .spacer, .bar .spacer { flex: 1; }
+  button, .btn { font: inherit; border: 1px solid var(--line); background: transparent; color: var(--text); padding: 5px 12px; border-radius: 6px; cursor: pointer; transition: border-color .15s, background .15s; }
   button:hover, .btn:hover { border-color: var(--accent); }
-  button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-  button.involved { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-  button.danger.active { background: var(--broken); border-color: var(--broken); }
+  button.active { background: var(--accent); border-color: var(--accent); color: var(--btn-on-text); font-weight: 600; }
+  button.involved { border-color: var(--accent); color: var(--accent); }
+  button.danger.active { background: var(--broken); border-color: var(--broken); color: #fff; }
   input[type=file] { display: none; }
   .bar { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 20px; align-items: center; border-bottom: 1px solid var(--line); background: var(--panel); }
-  .bar .label { color: var(--muted); margin-right: 4px; }
-  .stats { display: flex; gap: 18px; padding: 8px 20px; color: var(--muted); font-size: 13px; flex-wrap: wrap; }
-  .stats b { color: var(--text); }
-  .stats a { color: var(--accent); cursor: pointer; text-decoration: underline; }
-  main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 0; min-height: calc(100vh - 150px); }
-  #canvas { overflow: auto; padding: 10px 20px 20px; }
+  .bar .label { color: var(--muted); margin-right: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+  .stats { display: flex; gap: 22px; padding: 9px 20px; color: var(--muted); font-size: 12.5px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+  .stats b { color: var(--text); font-family: ui-monospace, "SF Mono", Consolas, monospace; }
+  .stats a { color: var(--accent); cursor: pointer; text-decoration: none; border-bottom: 1px dotted var(--accent); }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; min-height: calc(100vh - 150px); }
+  #canvas { overflow: auto; padding: 14px 20px 20px; background-color: var(--bg);
+    background-image: radial-gradient(ellipse at 30% 20%, var(--glow), transparent 60%),
+      linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 100% 100%, 32px 32px, 32px 32px; }
   aside { border-left: 1px solid var(--line); background: var(--panel); padding: 16px 18px; overflow: auto; max-height: calc(100vh - 150px); }
-  aside h2 { font-size: 16px; margin: 0 0 4px; }
-  aside h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 18px 0 6px; }
+  aside h2 { font-size: 17px; margin: 0 0 4px; }
+  aside h3 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 20px 0 6px; }
   aside p { margin: 6px 0; }
   aside ol, aside ul { padding-left: 20px; margin: 6px 0; }
-  aside li { margin: 3px 0; }
-  dl { display: grid; grid-template-columns: 120px 1fr; gap: 3px 10px; margin: 8px 0; }
+  aside li { margin: 4px 0; }
+  aside ol li::marker { color: var(--accent); font-weight: 700; }
+  dl { display: grid; grid-template-columns: 120px 1fr; gap: 4px 10px; margin: 8px 0; }
   dt { color: var(--muted); }
   dd { margin: 0; }
-  .tag { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); margin-left: 4px; vertical-align: 1px; }
+  .tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); margin-left: 6px; vertical-align: 2px; }
   .tag.warn { background: transparent; color: var(--risk); border: 1px solid var(--risk); }
   .tag.bad { background: transparent; color: var(--broken); border: 1px solid var(--broken); }
-  .card { border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; margin: 8px 0; }
+  .card { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 8px 0; background: var(--box); }
   .card.reg { border-left: 3px solid var(--broken); }
   .card h4 { margin: 0 0 4px; font-size: 14px; }
   .muted { color: var(--muted); }
   .warn { color: var(--risk); }
   .bad { color: var(--broken); }
   .linkish { color: var(--accent); cursor: pointer; }
-  .banner { margin: 10px 20px; padding: 10px 12px; border: 1px solid var(--risk); border-radius: 8px; color: var(--text); background: var(--panel); }
+  .banner { margin: 10px 20px; padding: 10px 12px; border: 1px solid var(--risk); border-radius: 8px; background: var(--panel); }
   .banner code { background: var(--bg); padding: 1px 4px; border-radius: 4px; }
   svg text { fill: var(--text); font-family: inherit; }
-  .colhead { font-size: 11px; fill: var(--muted) !important; text-transform: uppercase; letter-spacing: .06em; }
+  .colhead { font-size: 10.5px; fill: var(--muted) !important; text-transform: uppercase; letter-spacing: .14em; font-family: ui-monospace, Consolas, monospace; }
+  .flowtitle { font-size: 12px; fill: var(--accent) !important; letter-spacing: .16em; text-transform: uppercase; font-family: ui-monospace, Consolas, monospace; }
   .sys { cursor: pointer; }
-  .sys rect { stroke: var(--box-border); stroke-width: 1.2; transition: opacity .15s; }
-  .sys.t-External rect { fill: var(--ext); stroke-dasharray: 4 3; }
-  .sys.t-Vendor rect { fill: var(--vendor); }
-  .sys.t-Internal rect { fill: var(--internal); }
-  .sys:hover rect { stroke: var(--accent); }
-  .sys.selected rect { stroke: var(--accent); stroke-width: 2.5; }
-  .sys.on rect { stroke: var(--accent); stroke-width: 1.8; }
-  .sys.dim { opacity: .28; }
-  .sys.removed rect { stroke: var(--broken); stroke-width: 2.5; }
+  .sys rect.body { stroke: var(--box-border); stroke-width: 1.2; transition: stroke .15s; }
+  .sys.t-External rect.body { fill: var(--ext); stroke-dasharray: 5 4; }
+  .sys.t-Vendor rect.body { fill: var(--vendor); }
+  .sys.t-Internal rect.body { fill: var(--internal); }
+  .sys rect.bar { fill: var(--accent); opacity: 0; }
+  .sys:hover rect.body { stroke: var(--accent); }
+  .sys.on rect.body, .sys.selected rect.body { stroke: var(--accent); stroke-width: 1.6; filter: drop-shadow(0 0 8px var(--glow)); }
+  .sys.on rect.bar, .sys.selected rect.bar { opacity: 1; }
+  .sys.selected rect.body { stroke-width: 2.4; }
+  .sys.dim { opacity: .22; }
+  .sys.removed rect.body { stroke: var(--broken); stroke-width: 2.4; }
+  .sys.removed rect.bar { fill: var(--broken); }
   .sys.removed .x { stroke: var(--broken); stroke-width: 2; }
-  .sys.risk rect { stroke: var(--risk); stroke-width: 2.2; }
-  .sys .name { font-size: 12.5px; font-weight: 600; }
-  .sys .meta { font-size: 10.5px; fill: var(--muted); }
-  .sys .flag { font-size: 11px; fill: var(--broken); }
+  .sys.risk rect.body { stroke: var(--risk); stroke-width: 2; }
+  .sys.risk rect.bar { fill: var(--risk); opacity: 1; }
+  .sys .name { font-weight: 650; }
+  .sys .meta { fill: var(--muted); font-family: ui-monospace, Consolas, monospace; letter-spacing: .06em; text-transform: uppercase; }
+  .sys .cost { fill: var(--muted); font-family: ui-monospace, Consolas, monospace; text-anchor: end; }
+  .sys .flag { fill: var(--broken); }
   .edge { fill: none; stroke-width: 1.6; }
-  .edge.faint { stroke: var(--faint); stroke-dasharray: 4 6; animation: flow-slow 3s linear infinite; }
-  .edge:hover { stroke-width: 3.5; opacity: 1; cursor: help; }
-  .edge.active, .edge.own { stroke: var(--accent); stroke-width: 2.2; stroke-dasharray: 10 6; animation: flow 0.9s linear infinite; }
-  .edge.ctx { stroke: var(--ctx); opacity: .35; }
-  .edge.broken { stroke: var(--broken); stroke-width: 2.4; stroke-dasharray: 6 4; }
-  .edge.risk { stroke: var(--risk); stroke-width: 2; stroke-dasharray: 3 3; animation: flow-risk 1.4s linear infinite; }
-  .pulse { fill: var(--accent); filter: drop-shadow(0 0 3px var(--accent)); pointer-events: none; }
-  .pulse.risk { fill: var(--risk); filter: drop-shadow(0 0 3px var(--risk)); }
-  @keyframes flow { to { stroke-dashoffset: -16; } }
-  @keyframes flow-slow { to { stroke-dashoffset: -20; } }
-  @keyframes flow-risk { to { stroke-dashoffset: -12; } }
-  body.no-motion .edge { animation: none; }
-  body.no-motion .pulse { display: none; }
-  @media (prefers-reduced-motion: reduce) { .edge { animation: none !important; } .pulse { display: none; } }
-  .badge circle { fill: var(--panel); stroke-width: 1.5; }
-  .badge text { font-size: 10px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
-  .badge.active circle, .badge.own circle { stroke: var(--accent); }
-  .badge.ctx { opacity: .4; } .badge.ctx circle { stroke: var(--ctx); }
-  .badge.broken circle { stroke: var(--broken); } .badge.risk circle { stroke: var(--risk); }
-  .legend { display: flex; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: 12px; margin-top: 8px; }
+  .edge.faint { stroke: var(--faint); stroke-dasharray: 4 6; animation: dash 3s linear infinite; }
+  .edge.active, .edge.own { stroke: var(--accent); stroke-width: 2; opacity: .55; }
+  .edge.ctx { stroke: var(--ctx); opacity: .45; }
+  .edge.broken { stroke: var(--broken); stroke-width: 2.4; stroke-dasharray: 7 5; }
+  .edge.risk { stroke: var(--risk); stroke-width: 2; stroke-dasharray: 3 4; opacity: .8; }
+  .edge:hover { stroke-width: 4; opacity: 1; cursor: help; }
+  .beam { fill: none; stroke-width: 3.5; stroke-linecap: round; stroke-dasharray: 7 93; pointer-events: none;
+    stroke: var(--beam); filter: drop-shadow(0 0 3px var(--beam)) drop-shadow(0 0 8px var(--beam)); animation: beam 1.5s linear infinite; }
+  .beam.risk { stroke: var(--risk); filter: drop-shadow(0 0 4px var(--risk)); animation-duration: 2.4s; }
+  .beam.trail { stroke-width: 2; stroke-dasharray: 18 82; opacity: .35; filter: none; }
+  @keyframes beam { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+  @keyframes dash { to { stroke-dashoffset: -20; } }
+  .badge circle { fill: var(--panel); stroke-width: 1.6; stroke: var(--accent); }
+  .badge text { font-size: 10.5px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: var(--accent) !important; font-family: ui-monospace, Consolas, monospace; }
+  .badge.ctx { opacity: .4; } .badge.ctx circle { stroke: var(--ctx); } .badge.ctx text { fill: var(--muted) !important; }
+  .badge.broken circle { stroke: var(--broken); } .badge.broken text { fill: var(--broken) !important; }
+  .badge.risk circle { stroke: var(--risk); } .badge.risk text { fill: var(--risk) !important; }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; color: var(--muted); font-size: 12px; margin-top: 10px; }
   .legend span::before { content: ""; display: inline-block; width: 22px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 6px; }
   .legend .l-own::before { border-color: var(--accent); }
-  .legend .l-ctx::before { border-color: var(--ctx); opacity: .5; }
+  .legend .l-ctx::before { border-color: var(--ctx); }
   .legend .l-broken::before { border-color: var(--broken); border-top-style: dashed; }
   .legend .l-risk::before { border-color: var(--risk); border-top-style: dotted; }
+  body.no-motion .beam { display: none; }
+  body.no-motion .edge { animation: none; }
+  @media (prefers-reduced-motion: reduce) { .beam { display: none; } .edge { animation: none !important; } }
   @media (max-width: 1000px) { main { grid-template-columns: 1fr; } aside { border-left: 0; border-top: 1px solid var(--line); max-height: none; } }
 </style>
 </head>
 <body>
 <header>
-  <h1>IT Landscape</h1>
+  <h1>IT <span>Landscape</span></h1>
   <span class="sub" id="subtitle">Northwind Securities (fictional): systems, business flows and what breaks if a system goes</span>
   <span class="spacer"></span>
   <label class="btn" title="Load systems.csv, scenarios.csv and/or flows.csv">Load CSVs<input type="file" id="file" accept=".csv,text/csv" multiple></label>
   <button id="motion" title="Pause or resume the flow animation">Pause motion</button>
-  <button id="theme" title="Toggle light/dark theme">Theme</button>
+  <button id="theme" title="Toggle dark/light theme">Theme</button>
 </header>
 <div class="bar" id="scenarioBar"></div>
 <div class="stats" id="stats"></div>
@@ -139,14 +154,16 @@
 "use strict";
 // ---------- Configuration ----------
 const LAYER_NAMES = ["External parties", "Front office", "Operations", "Finance & reporting", "Reporting & settlement", "Regulator"];
-const BOX_W = 166, BOX_H = 50, COL_W = 215, ROW_H = 72, TOP = 46, LEFT = 10;
+const MAP = { W: 192, H: 64, COL: 246, ROW: 86, TOP: 46, LEFT: 6 };      // landscape (all systems by layer)
+const FLOW = { W: 252, H: 100, GX: 118, GY: 118, TOP: 64, LEFT: 20 };   // flow view (one process, big blocks)
 const SOON_DAYS = 180;
 const money = new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 });
+const kmoney = v => v >= 1000 ? "£" + Math.round(v / 1000) + "K" : "£" + v;
 
 // ---------- State ----------
 let data = { systems: [], scenarios: [], flows: [] };
-let state = { mode: "all", scenario: null, system: null, simulate: false };
-let pos = {};
+let state = { mode: "all", scenario: null, system: null, simulate: false, layout: "flow" };
+let pos = {}, geo = { W: MAP.W, H: MAP.H, kind: "map" };
 
 // ---------- CSV ----------
 function parseCSV(text) {
@@ -219,56 +236,96 @@ function validate() {
   return [...new Set(w)];
 }
 
-// ---------- Layout ----------
-function layout() {
-  pos = {};
+// ---------- Layouts ----------
+function layoutMap() {
+  pos = {}; geo = { W: MAP.W, H: MAP.H, kind: "map" };
   const layers = {};
   for (const s of data.systems) (layers[s.layer] ||= []).push(s);
   const maxRows = Math.max(1, ...Object.values(layers).map(l => l.length));
-  const height = TOP + maxRows * ROW_H + 10;
   for (const [layer, list] of Object.entries(layers)) {
-    const offset = (maxRows - list.length) * ROW_H / 2;
-    list.forEach((s, i) => { pos[s.id] = { x: LEFT + layer * COL_W, y: TOP + offset + i * ROW_H }; });
+    const offset = (maxRows - list.length) * MAP.ROW / 2;
+    list.forEach((s, i) => { pos[s.id] = { x: MAP.LEFT + layer * MAP.COL, y: MAP.TOP + offset + i * MAP.ROW }; });
   }
   const maxLayer = Math.max(0, ...data.systems.map(s => s.layer));
-  return { width: LEFT + (maxLayer + 1) * COL_W, height, maxLayer };
+  return { width: MAP.LEFT + maxLayer * MAP.COL + MAP.W + 50, height: MAP.TOP + maxRows * MAP.ROW, maxLayer };
 }
 
-function edgePath(f) {
-  const a = pos[f.from], b = pos[f.to], sa = sysById(f.from), sb = sysById(f.to);
-  if (!a || !b) return null;
-  let p1, p2, c1, c2;
-  if (sb.layer > sa.layer) {
-    p1 = { x: a.x + BOX_W, y: a.y + BOX_H / 2 - 6 }; p2 = { x: b.x, y: b.y + BOX_H / 2 - 6 };
-    const d = (p2.x - p1.x) / 2; c1 = { x: p1.x + d, y: p1.y }; c2 = { x: p2.x - d, y: p2.y };
-  } else if (sb.layer < sa.layer) {
-    p1 = { x: a.x, y: a.y + BOX_H / 2 + 6 }; p2 = { x: b.x + BOX_W, y: b.y + BOX_H / 2 + 6 };
-    const d = (p1.x - p2.x) / 2; c1 = { x: p1.x - d, y: p1.y }; c2 = { x: p2.x + d, y: p2.y };
-  } else {
-    p1 = { x: a.x + BOX_W, y: a.y + BOX_H / 2 }; p2 = { x: b.x + BOX_W, y: b.y + BOX_H / 2 };
-    c1 = { x: p1.x + 45, y: p1.y }; c2 = { x: p2.x + 45, y: p2.y };
-  }
+// Flow view: only the systems of one process, big blocks, laid out as a snake in order of first appearance.
+function layoutFlow(sid) {
+  pos = {}; geo = { W: FLOW.W, H: FLOW.H, kind: "flow" };
+  const order = [];
+  for (const f of flowsOf(sid)) for (const id of [f.from, f.to]) if (!order.includes(id) && sysById(id)) order.push(id);
+  const n = order.length, cols = n <= 4 ? n : Math.min(4, Math.ceil(n / 2)), rows = Math.ceil(n / cols);
+  order.forEach((id, i) => {
+    const r = Math.floor(i / cols); let c = i % cols; if (r % 2) c = cols - 1 - c;
+    pos[id] = { x: FLOW.LEFT + c * (FLOW.W + FLOW.GX), y: FLOW.TOP + r * (FLOW.H + FLOW.GY), slot: { r, c } };
+  });
+  return { width: FLOW.LEFT * 2 + cols * FLOW.W + (cols - 1) * FLOW.GX + 40, height: FLOW.TOP + rows * FLOW.H + (rows - 1) * FLOW.GY + 40, order };
+}
+
+function bezier(p1, c1, c2, p2) {
   const mid = { x: (p1.x + 3 * c1.x + 3 * c2.x + p2.x) / 8, y: (p1.y + 3 * c1.y + 3 * c2.y + p2.y) / 8 };
   return { d: `M${p1.x},${p1.y} C${c1.x},${c1.y} ${c2.x},${c2.y} ${p2.x},${p2.y}`, mid };
 }
 
-// ---------- Render: diagram ----------
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function edgePath(f) {
+  const a = pos[f.from], b = pos[f.to];
+  if (!a || !b) return null;
+  const { W, H } = geo, o = (f.from < f.to ? -1 : 1) * (geo.kind === "flow" ? 10 : 6);   // separates A→B from B→A
+  if (geo.kind === "map") {
+    const la = sysById(f.from).layer, lb = sysById(f.to).layer;
+    if (lb > la) { const p1 = { x: a.x + W, y: a.y + H / 2 + o }, p2 = { x: b.x, y: b.y + H / 2 + o }, d = (p2.x - p1.x) / 2; return bezier(p1, { x: p1.x + d, y: p1.y }, { x: p2.x - d, y: p2.y }, p2); }
+    if (lb < la) { const p1 = { x: a.x, y: a.y + H / 2 + o }, p2 = { x: b.x + W, y: b.y + H / 2 + o }, d = (p1.x - p2.x) / 2; return bezier(p1, { x: p1.x - d, y: p1.y }, { x: p2.x + d, y: p2.y }, p2); }
+    const p1 = { x: a.x + W, y: a.y + H / 2 }, p2 = { x: b.x + W, y: b.y + H / 2 };
+    return bezier(p1, { x: p1.x + 50, y: p1.y }, { x: p2.x + 50, y: p2.y }, p2);
+  }
+  // flow view
+  const sa = a.slot, sb = b.slot, acx = a.x + W / 2, bcx = b.x + W / 2, acy = a.y + H / 2, bcy = b.y + H / 2;
+  if (sa.r === sb.r) {
+    if (Math.abs(sa.c - sb.c) === 1) {
+      const sx = bcx > acx ? 1 : -1, p1 = { x: acx + sx * W / 2, y: acy + o }, p2 = { x: bcx - sx * W / 2, y: bcy + o };
+      const k = Math.abs(p2.x - p1.x) / 2; return bezier(p1, { x: p1.x + sx * k, y: p1.y }, { x: p2.x - sx * k, y: p2.y }, p2);
+    }
+    const lift = 46 + 10 * Math.abs(sa.c - sb.c), p1 = { x: acx + (bcx > acx ? 30 : -30), y: a.y }, p2 = { x: bcx + (bcx > acx ? -30 : 30), y: b.y };
+    return bezier(p1, { x: p1.x, y: p1.y - lift }, { x: p2.x, y: p2.y - lift }, p2);
+  }
+  const sy = bcy > acy ? 1 : -1, spread = Math.max(-W / 3, Math.min(W / 3, (bcx - acx) * 0.12));
+  const p1 = { x: acx + spread + o, y: acy + sy * H / 2 }, p2 = { x: bcx - spread + o, y: bcy - sy * H / 2 };
+  const k = Math.max(40, Math.abs(p2.y - p1.y) / 2);
+  return bezier(p1, { x: p1.x, y: p1.y + sy * k }, { x: p2.x, y: p2.y - sy * k }, p2);
+}
 
-function render() {
-  renderBar(); renderStats(); renderDiagram(); renderPanel();
+// ---------- Render ----------
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const trim = (s, n) => s.length > n ? s.slice(0, n - 1) + "…" : s;
+
+function render() { renderBar(); renderStats(); renderDiagram(); renderPanel(); }
+
+function boxSvg(s, cls) {
+  const p = pos[s.id], { W, H, kind } = geo, big = kind === "flow";
+  const meta = [s.type, s.criticality].filter(Boolean).join(" · ");
+  const fs = big ? 16 : 13, ms = big ? 10.5 : 9.5, nmax = big ? 24 : 22;
+  const cross = cls.includes("removed") ? `<path class="x" d="M${p.x + 8},${p.y + 8} L${p.x + W - 8},${p.y + H - 8} M${p.x + W - 8},${p.y + 8} L${p.x + 8},${p.y + H - 8}"/>` : "";
+  return `<g class="sys t-${esc(s.type)} ${cls}" data-id="${esc(s.id)}" tabindex="0" role="button" aria-label="${esc(s.name)}">
+    <rect class="body" x="${p.x}" y="${p.y}" width="${W}" height="${H}" rx="10"/>
+    <rect class="bar" x="${p.x + 10}" y="${p.y}" width="${W - 20}" height="3" rx="1.5"/>
+    <text class="name" x="${p.x + 14}" y="${p.y + (big ? 38 : 27)}" style="font-size:${fs}px">${esc(trim(s.name, nmax))}</text>
+    <text class="meta" x="${p.x + 14}" y="${p.y + (big ? 62 : 47)}" style="font-size:${ms}px">${esc(meta)}</text>
+    ${big && s.purpose ? `<text class="meta" x="${p.x + 14}" y="${p.y + 82}" style="font-size:10px;text-transform:none;letter-spacing:0">${esc(trim(s.purpose, 36))}</text>` : ""}
+    ${s.annual_cost ? `<text class="cost" x="${p.x + W - 12}" y="${p.y + (big ? 62 : 47)}" style="font-size:${ms}px">${kmoney(s.annual_cost)}</text>` : ""}
+    ${s.regulatory ? `<text class="flag" x="${p.x + W - 22}" y="${p.y + (big ? 26 : 20)}" style="font-size:${big ? 14 : 12}px">⚑</text>` : ""}
+    ${cross}<title>${esc(s.name + " — " + (s.purpose || ""))}</title></g>`;
 }
 
 function renderDiagram() {
-  const { width, height, maxLayer } = layout();
   const svg = document.getElementById("svg");
-  svg.setAttribute("viewBox", `0 0 ${width + 40} ${height}`);
-  svg.style.width = "100%"; svg.style.maxWidth = (width + 40) + "px"; svg.style.height = "auto";
-
-  const edges = [];         // {flow, cls, badge}
-  const boxCls = {};        // id -> class list
   const { mode, scenario, system, simulate } = state;
+  const flowView = mode === "scenario" && state.layout === "flow";
+  const L = flowView ? layoutFlow(scenario) : layoutMap();
+  svg.setAttribute("viewBox", `0 0 ${L.width} ${L.height}`);
+  svg.style.width = "100%"; svg.style.maxWidth = L.width + "px"; svg.style.height = "auto";
 
+  const edges = [], boxCls = {};
   if (mode === "all") {
     const seen = new Set();
     for (const f of data.flows) { const k = f.from + ">" + f.to; if (!seen.has(k)) { seen.add(k); edges.push({ flow: f, cls: "faint" }); } }
@@ -294,46 +351,38 @@ function renderDiagram() {
 
   const order = { faint: 0, ctx: 1, own: 2, active: 2, risk: 3, broken: 4 };
   edges.sort((a, b) => order[a.cls] - order[b.cls]);
-  const markers = ["faint", "ctx", "own", "active", "broken", "risk"].map(c =>
-    `<marker id="m-${c}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-       <path d="M0,0 L10,5 L0,10 z" style="fill: var(--${{ faint: "faint", ctx: "ctx", own: "accent", active: "accent", broken: "broken", risk: "risk" }[c]})"/></marker>`).join("");
+  const col = { faint: "faint", ctx: "ctx", own: "accent", active: "accent", broken: "broken", risk: "risk" };
+  let out = `<defs>${Object.keys(col).map(c => `<marker id="m-${c}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill: var(--${col[c]})"/></marker>`).join("")}</defs>`;
 
-  let out = `<defs>${markers}</defs>`;
-  for (let l = 0; l <= maxLayer; l++) out += `<text class="colhead" x="${LEFT + l * COL_W}" y="22">${esc(LAYER_NAMES[l] || "Layer " + l)}</text>`;
-  const badges = [], pulses = [];
+  if (flowView) {
+    const s = scnById(scenario);
+    out += `<text class="flowtitle" x="${FLOW.LEFT}" y="26">Flow view · ${esc(s.name)} · ${flowsOf(scenario).length} steps${s.regulatory ? " · regulatory" : ""}</text>`;
+  } else {
+    for (let l = 0; l <= L.maxLayer; l++) out += `<text class="colhead" x="${MAP.LEFT + l * MAP.COL}" y="22">${esc(LAYER_NAMES[l] || "Layer " + l)}</text>`;
+  }
+
+  const beams = [], badges = [];
   edges.forEach((e, i) => {
     const g = edgePath(e.flow); if (!g) return;
     const scn = scnById(e.flow.scenario_id);
     const title = `${scn ? scn.name : e.flow.scenario_id} · step ${e.flow.step}: ${nameOf(e.flow.from)} → ${nameOf(e.flow.to)} — ${e.flow.data}${e.flow.channel ? " (" + e.flow.channel + ")" : ""}`;
-    out += `<path id="e${i}" class="edge ${e.cls}" d="${g.d}" marker-end="url(#m-${e.cls})"><title>${esc(title)}</title></path>`;
+    out += `<path class="edge ${e.cls}" d="${g.d}" marker-end="url(#m-${e.cls})"><title>${esc(title)}</title></path>`;
     if (["active", "own", "risk"].includes(e.cls)) {
-      const dur = 1.6, delay = ((e.flow.step - 1) * 0.45) % 4;
-      pulses.push(`<circle class="pulse ${e.cls === "risk" ? "risk" : ""}" r="4" opacity="0"><set attributeName="opacity" to="1" begin="${delay}s"/><animateMotion dur="${dur}s" begin="${delay}s" repeatCount="indefinite"><mpath href="#e${i}"/></animateMotion></circle>`);
+      const delay = -((e.flow.step * 0.27) % 1.5).toFixed(2), rk = e.cls === "risk" ? " risk" : "";
+      beams.push(`<path class="beam trail${rk}" d="${g.d}" pathLength="100" style="animation-delay:${delay}s"/><path class="beam${rk}" d="${g.d}" pathLength="100" style="animation-delay:${delay}s"/>`);
     }
-    if (e.badge) badges.push(`<g class="badge ${e.cls}"><title>${esc(title)}</title><circle cx="${g.mid.x}" cy="${g.mid.y}" r="9"/><text x="${g.mid.x}" y="${g.mid.y}">${e.flow.step}</text></g>`);
+    if (e.badge) badges.push(`<g class="badge ${e.cls}"><title>${esc(title)}</title><circle cx="${g.mid.x}" cy="${g.mid.y}" r="${flowView ? 11 : 9}"/><text x="${g.mid.x}" y="${g.mid.y}">${e.flow.step}</text></g>`);
   });
-  for (const s of data.systems) {
-    const p = pos[s.id], cls = (boxCls[s.id] || []).join(" ");
-    const meta = [s.type, s.criticality].filter(Boolean).join(" · ");
-    const cross = cls.includes("removed") ? `<path class="x" d="M${p.x + 6},${p.y + 6} L${p.x + BOX_W - 6},${p.y + BOX_H - 6} M${p.x + BOX_W - 6},${p.y + 6} L${p.x + 6},${p.y + BOX_H - 6}"/>` : "";
-    out += `<g class="sys t-${esc(s.type)} ${cls}" data-id="${esc(s.id)}" tabindex="0" role="button" aria-label="${esc(s.name)}">
-      <rect x="${p.x}" y="${p.y}" width="${BOX_W}" height="${BOX_H}" rx="8"/>
-      <text class="name" x="${p.x + 10}" y="${p.y + 21}">${esc(trim(s.name, 22))}</text>
-      <text class="meta" x="${p.x + 10}" y="${p.y + 38}">${esc(meta)}</text>
-      ${s.regulatory ? `<text class="flag" x="${p.x + BOX_W - 16}" y="${p.y + 17}">⚑</text>` : ""}
-      ${cross}<title>${esc(s.name + " — " + (s.purpose || ""))}</title></g>`;
-  }
-  svg.innerHTML = out + pulses.join("") + badges.join("");
+  for (const s of data.systems) if (pos[s.id]) out += boxSvg(s, (boxCls[s.id] || []).join(" "));
+  svg.innerHTML = out + beams.join("") + badges.join("");
 }
-const trim = (s, n) => s.length > n ? s.slice(0, n - 1) + "…" : s;
 
-// ---------- Render: scenario bar & stats ----------
 function renderBar() {
   const involved = state.mode === "system" ? new Set(scenariosWith(state.system).map(s => s.id)) : new Set();
-  const bar = document.getElementById("scenarioBar");
-  bar.innerHTML = `<span class="label">Processes:</span>` +
+  document.getElementById("scenarioBar").innerHTML = `<span class="label">Processes</span>` +
     `<button data-scn="" class="${state.mode === "all" ? "active" : ""}">All systems</button>` +
-    data.scenarios.map(s => `<button data-scn="${esc(s.id)}" title="${esc(s.description)}" class="${state.mode === "scenario" && state.scenario === s.id ? "active" : ""} ${involved.has(s.id) ? "involved" : ""}">${s.regulatory ? "⚑ " : ""}${esc(s.name)}</button>`).join("");
+    data.scenarios.map(s => `<button data-scn="${esc(s.id)}" title="${esc(s.description)}" class="${state.mode === "scenario" && state.scenario === s.id ? "active" : ""} ${involved.has(s.id) ? "involved" : ""}">${s.regulatory ? "⚑ " : ""}${esc(s.name)}</button>`).join("") +
+    (state.mode === "scenario" ? `<span class="spacer"></span><button id="layoutBtn" title="Switch between the process flow and the full landscape">${state.layout === "flow" ? "Show on full map" : "Show as flow"}</button>` : "");
 }
 
 function renderStats() {
@@ -348,13 +397,14 @@ function renderStats() {
     `<span><b>${orphans.length}</b> without flows${orphans.length ? ": " + orphans.map(s => `<a data-sys="${esc(s.id)}">${esc(s.name)}</a>`).join(", ") : ""}</span>`;
 }
 
-// ---------- Render: side panel ----------
 function renderPanel() {
   const el = document.getElementById("panel");
   if (state.mode === "scenario") {
     const s = scnById(state.scenario), F = flowsOf(s.id);
+    const cost = [...new Set(F.flatMap(f => [f.from, f.to]))].reduce((a, id) => a + ((sysById(id) || {}).annual_cost || 0), 0);
     el.innerHTML = `<h2>${esc(s.name)}${s.regulatory ? '<span class="tag bad">⚑ regulatory</span>' : ""}</h2>
       <p class="muted">${esc(s.description)}</p>
+      <p class="muted">Systems involved cost <b style="color:var(--text)">${money.format(cost)}</b> a year in total.</p>
       <h3>Steps</h3><ol>${F.map(f => `<li><span class="linkish" data-sys="${esc(f.from)}">${esc(nameOf(f.from))}</span> → <span class="linkish" data-sys="${esc(f.to)}">${esc(nameOf(f.to))}</span><br><span class="muted">${esc(f.data)}${f.channel ? " · " + esc(f.channel) : ""}</span></li>`).join("")}</ol>
       <p class="muted">Click a system to see every process it takes part in and what breaks without it.</p>`;
     return;
@@ -385,7 +435,7 @@ function renderPanel() {
     el.innerHTML = html; return;
   }
   el.innerHTML = `<h2>How to use</h2>
-    <ol><li>Pick a <b>process</b> above to see its numbered steps.</li>
+    <ol><li>Pick a <b>process</b> above to see it as a flow, step by step.</li>
     <li>Click a <b>system</b> to see every process it takes part in.</li>
     <li>Use <b>If removed</b> to see what breaks, who is left without input and which regulatory processes are affected.</li>
     <li>Systems with no flows are flagged as decommissioning candidates.</li></ol>
@@ -398,15 +448,16 @@ function renderPanel() {
 }
 
 // ---------- Events ----------
-function selectSystem(id) { if (!sysById(id)) return; state = { mode: "system", system: id, scenario: null, simulate: false }; render(); }
-function selectScenario(id) { state = id ? { mode: "scenario", scenario: id, system: null, simulate: false } : { mode: "all", scenario: null, system: null, simulate: false }; render(); }
+function selectSystem(id) { if (!sysById(id)) return; state = { ...state, mode: "system", system: id, scenario: null, simulate: false }; render(); }
+function selectScenario(id) { state = id ? { ...state, mode: "scenario", scenario: id, system: null, simulate: false } : { ...state, mode: "all", scenario: null, system: null, simulate: false }; render(); }
 
 document.addEventListener("click", e => {
+  if (e.target.id === "simulate") { state.simulate = !state.simulate; return render(); }
+  if (e.target.id === "layoutBtn") { state.layout = state.layout === "flow" ? "map" : "flow"; return render(); }
   const sys = e.target.closest("[data-sys], .sys");
   if (sys) return selectSystem(sys.dataset.sys || sys.dataset.id);
   const scn = e.target.closest("[data-scn]");
   if (scn) return selectScenario(scn.dataset.scn);
-  if (e.target.id === "simulate") { state.simulate = !state.simulate; render(); }
 });
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") selectScenario("");
@@ -416,10 +467,11 @@ document.addEventListener("keydown", e => {
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch { } } };
 function applyTheme(t) { document.documentElement.dataset.theme = t; store.set("itl-theme", t); }
 const motionBtn = document.getElementById("motion");
-function applyMotion(on) { document.body.classList.toggle("no-motion", !on); motionBtn.textContent = on ? "Pause motion" : "Play motion"; store.set("itl-motion", on ? "1" : "0"); const svg = document.getElementById("svg"); if (svg.pauseAnimations) on ? svg.unpauseAnimations() : svg.pauseAnimations(); }
+function applyMotion(on) { document.body.classList.toggle("no-motion", !on); motionBtn.textContent = on ? "Pause motion" : "Play motion"; store.set("itl-motion", on ? "1" : "0"); }
 motionBtn.onclick = () => applyMotion(document.body.classList.contains("no-motion"));
-document.getElementById("theme").onclick = () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
-applyTheme(store.get("itl-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+document.getElementById("theme").onclick = () => applyTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
+applyTheme(store.get("itl-theme") || "dark");
+applyMotion(store.get("itl-motion") !== "0");
 
 document.getElementById("file").addEventListener("change", async e => {
   const loaded = [];
@@ -447,7 +499,7 @@ async function boot() {
   }
   render();
 }
-boot().then(() => applyMotion(store.get("itl-motion") !== "0"));
+boot();
 </script>
 </body>
 </html>
