@@ -155,6 +155,7 @@
 // ---------- Configuration ----------
 const LAYER_NAMES = ["External parties", "Front office", "Operations", "Finance & reporting", "Reporting & settlement", "Regulator"];
 const MAP = { W: 192, H: 64, COL: 246, ROW: 86, TOP: 46, LEFT: 6 };      // landscape (all systems by layer)
+const MAPV = { W: 178, H: 62, GX: 22, ROW: 124, TOP: 34, LEFT: 10 };     // landscape on narrow screens: layers as rows
 const FLOW = { W: 252, H: 100, GX: 118, GY: 118, TOP: 64, LEFT: 20 };   // flow view (one process, big blocks)
 const SOON_DAYS = 180;
 const money = new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 });
@@ -237,10 +238,23 @@ function validate() {
 }
 
 // ---------- Layouts ----------
+const isNarrow = () => (document.getElementById("canvas").clientWidth || 1200) < 900;
+
 function layoutMap() {
-  pos = {}; geo = { W: MAP.W, H: MAP.H, kind: "map" };
   const layers = {};
   for (const s of data.systems) (layers[s.layer] ||= []).push(s);
+  if (isNarrow()) {   // vertical: one row per layer, top to bottom
+    pos = {}; geo = { W: MAPV.W, H: MAPV.H, kind: "mapv" };
+    const maxCols = Math.max(1, ...Object.values(layers).map(l => l.length));
+    const width = MAPV.LEFT * 2 + maxCols * MAPV.W + (maxCols - 1) * MAPV.GX;
+    for (const [layer, list] of Object.entries(layers)) {
+      const rowW = list.length * MAPV.W + (list.length - 1) * MAPV.GX, x0 = (width - rowW) / 2;
+      list.forEach((s, i) => { pos[s.id] = { x: x0 + i * (MAPV.W + MAPV.GX), y: MAPV.TOP + layer * MAPV.ROW }; });
+    }
+    const maxLayer = Math.max(0, ...data.systems.map(s => s.layer));
+    return { width, height: MAPV.TOP + maxLayer * MAPV.ROW + MAPV.H + 20, maxLayer, vertical: true };
+  }
+  pos = {}; geo = { W: MAP.W, H: MAP.H, kind: "map" };
   const maxRows = Math.max(1, ...Object.values(layers).map(l => l.length));
   for (const [layer, list] of Object.entries(layers)) {
     const offset = (maxRows - list.length) * MAP.ROW / 2;
@@ -279,6 +293,16 @@ function edgePath(f) {
     if (lb < la) { const p1 = { x: a.x, y: a.y + H / 2 + o }, p2 = { x: b.x + W, y: b.y + H / 2 + o }, d = (p1.x - p2.x) / 2; return bezier(p1, { x: p1.x - d, y: p1.y }, { x: p2.x + d, y: p2.y }, p2); }
     const p1 = { x: a.x + W, y: a.y + H / 2 }, p2 = { x: b.x + W, y: b.y + H / 2 };
     return bezier(p1, { x: p1.x + 50, y: p1.y }, { x: p2.x + 50, y: p2.y }, p2);
+  }
+  if (geo.kind === "mapv") {
+    const la = sysById(f.from).layer, lb = sysById(f.to).layer, ax = a.x + W / 2, bx = b.x + W / 2;
+    const sp = Math.max(-W / 3, Math.min(W / 3, (bx - ax) * 0.15));
+    if (lb !== la) {
+      const sy = lb > la ? 1 : -1, p1 = { x: ax + sp + o, y: sy > 0 ? a.y + H : a.y }, p2 = { x: bx - sp + o, y: sy > 0 ? b.y : b.y + H };
+      const k = Math.max(30, Math.abs(p2.y - p1.y) / 2); return bezier(p1, { x: p1.x, y: p1.y + sy * k }, { x: p2.x, y: p2.y - sy * k }, p2);
+    }
+    const p1 = { x: ax + o, y: a.y + H }, p2 = { x: bx + o, y: b.y + H };
+    return bezier(p1, { x: p1.x, y: p1.y + 38 }, { x: p2.x, y: p2.y + 38 }, p2);
   }
   // flow view
   const sa = a.slot, sb = b.slot, acx = a.x + W / 2, bcx = b.x + W / 2, acy = a.y + H / 2, bcy = b.y + H / 2;
@@ -359,7 +383,9 @@ function renderDiagram() {
     const s = scnById(scenario);
     out += `<text class="flowtitle" x="${FLOW.LEFT}" y="26">Flow view · ${esc(s.name)} · ${flowsOf(scenario).length} steps${s.regulatory ? " · regulatory" : ""}</text>`;
   } else {
-    for (let l = 0; l <= L.maxLayer; l++) out += `<text class="colhead" x="${MAP.LEFT + l * MAP.COL}" y="22">${esc(LAYER_NAMES[l] || "Layer " + l)}</text>`;
+    for (let l = 0; l <= L.maxLayer; l++) out += L.vertical
+      ? `<text class="colhead" x="${MAPV.LEFT}" y="${MAPV.TOP + l * MAPV.ROW - 12}">${esc(LAYER_NAMES[l] || "Layer " + l)}</text>`
+      : `<text class="colhead" x="${MAP.LEFT + l * MAP.COL}" y="22">${esc(LAYER_NAMES[l] || "Layer " + l)}</text>`;
   }
 
   const beams = [], badges = [];
@@ -500,7 +526,7 @@ async function boot() {
   }
   render();
 }
-let resizeTimer; addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (state.mode === "scenario") renderDiagram(); }, 150); });
+let resizeTimer; addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { renderDiagram(); }, 150); });
 boot();
 </script>
 </body>
